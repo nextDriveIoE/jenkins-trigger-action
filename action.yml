@@ -1,0 +1,25 @@
+name: 'Jenkins Trigger Action'
+description: 'This action allows you to trigger jenkins action and check status.'
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+inputs:
+  jenkins_domain:
+    description: "The domain of the jenkins server. For example: https://jenkins.example.com"
+    required: true
+  jenkins_user:
+    description: "The username for the jenkins server. For example: admin"
+    required: true
+  jenkins_token:
+    description: "The API token for the jenkins server. You can generate it in your user settings in jenkins."
+    required: true
+  job_name:
+    description: "The name of the jenkins job to trigger. For example: my-job"
+    required: true
+  payload:
+    description: "The payload to send to the jenkins job. This is a JSON object that will be passed to the job as parameters."
+    required: true
+  is_need_trigger_status:
+    description: "Whether to check the status of the triggered job. If true, the action will wait for the job to finish and return the status."
+    required: false
+
