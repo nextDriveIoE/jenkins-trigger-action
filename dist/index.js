@@ -32293,7 +32293,7 @@ async function run() {
                 await new Promise(r => setTimeout(r, 10000));
             }
             if (buildNumber) {
-                const triggerUrl = `https://${domain}/job/${jobName}/${buildNumber}/api/json`;
+                const triggerUrl = `https://${domain}/${jobName}/${buildNumber}/api/json`;
                 console.log(`Triggered Jenkins job URL Status: ${triggerUrl}`);
                 let buildResult;
                 let checkTimes = 0;
