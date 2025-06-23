@@ -32261,8 +32261,9 @@ async function run() {
         const payload = core.getInput('payload', { required: true });
         const parsePayload = JSON.parse(payload);
         const isNeedTriggerStatus = core.getInput('is_need_trigger_status') === 'true';
-        console.log({ isNeedTriggerStatus }, core.getInput('is_need_trigger_status'));
-        const url = `${domain}/job/${jobName}/buildWithParameters`;
+        console.log(`Triggering Jenkins job: ${jobName} with payload:`, parsePayload);
+        const url = `https://${domain}/${jobName}/buildWithParameters`;
+        console.log(`Triggering Jenkins job at URL: ${url}`);
         const response = await axios_1.default.post(url, qs_1.default.stringify(parsePayload), {
             auth: {
                 username: user,
@@ -32289,12 +32290,15 @@ async function run() {
                 else if (queueRes.data.cancelled) {
                     throw new Error('Build was cancelled');
                 }
-                await new Promise(r => setTimeout(r, 3000));
+                await new Promise(r => setTimeout(r, 10000));
             }
             if (buildNumber) {
                 const triggerUrl = `${domain}/job/${jobName}/${buildNumber}/api/json`;
                 let buildResult;
-                while (!buildResult) {
+                let checkTimes = 0;
+                console.log(`Waiting for Jenkins job ${jobName} build number ${buildNumber} to complete...`);
+                // Polling for job status
+                while (!buildResult && checkTimes < 30) {
                     const jobStatusResponse = await axios_1.default.get(triggerUrl, {
                         auth: {
                             username: user,
@@ -32304,12 +32308,20 @@ async function run() {
                     if (!jobStatusResponse.data.building) {
                         buildResult = jobStatusResponse.data.result;
                     }
-                    await new Promise(r => setTimeout(r, 3000));
+                    checkTimes++;
+                    await new Promise(r => setTimeout(r, 50000));
+                }
+                if (checkTimes >= 30) {
+                    buildResult = 'TIMEOUT';
+                    console.error(`Jenkins job ${jobName} build number ${buildNumber} timed out after 30 checks.`);
                 }
                 const targetJob = 'Job: ' + jobName + ', Build ID: ' + buildNumber;
                 console.log(`Triggered Jenkins job status:`, targetJob);
                 if (buildResult === 'SUCCESS') {
                     console.log('Build success', targetJob);
+                }
+                else if (buildResult === 'TIMEOUT') {
+                    throw new Error('Build timed out');
                 }
                 else {
                     console.log('Build failed:', targetJob);
