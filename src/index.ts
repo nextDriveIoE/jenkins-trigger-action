@@ -12,8 +12,8 @@ async function run(): Promise<void> {
     const payload = core.getInput('payload', { required: true });
     const parsePayload = JSON.parse(payload);
     const isNeedTriggerStatus = core.getInput('is_need_trigger_status') === 'true';
-    console.log({isNeedTriggerStatus}, core.getInput('is_need_trigger_status'))
-    const url = `${domain}/job/${jobName}/buildWithParameters`;
+    console.log(`Triggering Jenkins job: ${jobName} with payload:`, parsePayload);
+    const url = `${domain}/${jobName}/buildWithParameters`;
     const response = await axios.post(url, qs.stringify(parsePayload), {
       auth: {
         username: user,
